@@ -10,6 +10,12 @@ let index = 0;
 
 slideBtns[0].classList.add("active");
 
+setInterval(() => {
+  index == slides.length - 3 ? (index = 0) : index++;
+  slider.style.transform = `translateX(${310 * -index}px)`;
+  addColor();
+}, 2000);
+
 slideBtns.forEach((btn, indexBtn) => {
   btn.addEventListener("click", (e) => {
     if (indexBtn == 0) {
