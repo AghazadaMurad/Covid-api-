@@ -1,57 +1,69 @@
 "use strict";
 
-const leftBtn = document.getElementById("left__btn");
-const rightBtn = document.getElementById("right__btn");
-const slider = document.querySelector(".slider");
-const slides = document.querySelectorAll(".slide");
-const slideBtns = document.querySelectorAll(".slide-points div");
+const search = document.querySelector(".search");
+const ulReg = document.querySelector(".allData");
+const countName = document.querySelector(".country-name");
 
-let index = 0;
+let data;
 
-slideBtns[0].classList.add("active");
+const getData = (searchedValue) => {
+  fetch("https://api.api-ninjas.com/v1/covid19?country=" + searchedValue, {
+    headers: {
+      "X-API-KEY": "14I46t10KHlTvs2qL1wcKQ==y84nxuztnx838eMd",
+    },
+  })
+    .then((response) => response.json())
+    .then((datas) => {
+      data = datas;
+      console.log(data);
+      displayAll(data);
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+};
 
-setInterval(() => {
-  index == slides.length - 3 ? (index = 0) : index++;
-  slider.style.transform = `translateX(${310 * -index}px)`;
-  addColor();
-}, 2000);
+search.addEventListener("input", (e) => {
+  getData(e.target.value.trim());
+});
 
-slideBtns.forEach((btn, indexBtn) => {
-  btn.addEventListener("click", (e) => {
-    if (indexBtn == 0) {
-      index = 0;
-    } else if (indexBtn == 1) {
-      index = 3;
-    } else if (indexBtn == 2) {
-      index = 6;
+const displayAll = (data) => {
+  ulReg.innerHTML = "";
+  countName.innerText = search.value.trim();
+
+  data.forEach((regions) => {
+    console.log(regions);
+    const p = document.createElement("p");
+    p.className = "region";
+    p.textContent =
+      regions.region == "" ? `No Region` : `Region: ${regions.region}`;
+    const country = document.createElement("div");
+    ulReg.append(p, country);
+
+    for (const cases in regions.cases) {
+      const total = regions.cases[cases].total;
+      const newC = regions.cases[cases].new;
+
+      const countryCont = document.createElement("div");
+      const img = document.createElement("img");
+      const pDate = document.createElement("p");
+      const pTotal = document.createElement("p");
+      const pNew = document.createElement("p");
+
+      country.append(countryCont);
+      countryCont.append(img, pDate, pTotal, pNew);
+      // ulReg.append(country);
+
+      country.className = "country";
+      countryCont.className = "country-cont";
+      pDate.className = "date";
+      pTotal.className = "total";
+      pNew.className = "new";
+      img.src = "/covid-removebg-preview.png";
+
+      pDate.textContent = `Date: ${cases}`;
+      pTotal.textContent = `Total: ${total}`;
+      pNew.textContent = `New: ${newC}`;
     }
-    slider.style.transform = `translateX(${310 * -index}px)`;
-    addColor();
   });
-});
-
-rightBtn.addEventListener("click", () => {
-  index == slides.length - 3 ? (index = 0) : index++;
-  slider.style.transform = `translateX(${310 * -index}px)`;
-
-  addColor();
-});
-leftBtn.addEventListener("click", () => {
-  index == 0 ? (index = slides.length - 3) : index--;
-  slider.style.transform = `translateX(${310 * -index}px)`;
-
-  addColor();
-});
-
-const addColor = () => {
-  slideBtns.forEach((btn, indexBtn) => {
-    btn.className = "";
-  });
-  if (index >= 3 && index < 6) {
-    slideBtns[1].classList.add("active");
-  } else if (index >= 6 && index <= 9) {
-    slideBtns[2].classList.add("active");
-  } else {
-    slideBtns[0].classList.add("active");
-  }
 };
